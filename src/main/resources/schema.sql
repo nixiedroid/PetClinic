@@ -16,5 +16,5 @@ CREATE TABLE site.pets (
                       birth_date DATE,
                       type VARCHAR(30) NOT NULL,
                       owner_id INTEGER,
-                      FOREIGN KEY (owner_id) REFERENCES owners(id) ON DELETE CASCADE
+                      FOREIGN KEY (owner_id) REFERENCES site.owners(id) ON DELETE CASCADE
 );
