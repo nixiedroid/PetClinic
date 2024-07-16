@@ -20,6 +20,7 @@ erDiagram
         String address "адрес владельца"
         String city "город владельца"
         String telephone "телефон владельца"
+        List(Pet) pets "питомцы"
     }
     Pet {
         Long id "уникальный идентификатор питомца"
