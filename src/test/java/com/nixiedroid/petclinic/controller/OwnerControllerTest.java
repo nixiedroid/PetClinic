@@ -1,6 +1,7 @@
 package com.nixiedroid.petclinic.controller;
 
 import com.nixiedroid.petclinic.model.OwnerDTO;
+import com.nixiedroid.petclinic.service.ErrorMapper;
 import com.nixiedroid.petclinic.service.OwnerService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -26,10 +27,12 @@ public class OwnerControllerTest {
     @MockBean
     private OwnerService ownerService;
 
+    @MockBean
+    private ErrorMapper mapper;
+
     @Test
     public void getAllOwners_shouldReturnEmptyArray() throws Exception {
         Mockito.when(ownerService.getAllOwners()).thenReturn(Collections.emptyList());
-
         mockMvc.perform(MockMvcRequestBuilders.get("/owners")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
