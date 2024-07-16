@@ -30,7 +30,29 @@ erDiagram
     }
 
 ```
+### SiteMap
 
+```mermaid
+---
+title: Sitemap
+---
+
+flowchart TB
+   root{"/(root)"} ---> own(/owners)
+   root ---> pet(/pets)
+   own --> GETown{{GET}}
+   own --> POSTown{{POST}}
+   own ---> ownID("/{id}")
+   ownID --> GETownID{{GET}}
+   ownID --> PUTownID{{PUT}}
+   ownID --> DELETEownID{{DELETE}}
+   pet --> GETpet{{GET}}
+   pet --> POSTpet{{POST}}
+   pet ---> petID("/{id}")
+   petID --> GETpetID{{GET}}
+   petID --> PUTpetID{{PUT}}
+   petID --> DELETEpetID{{DELETE}}
+```
 
 ### Зависимости проекта
 - `org.springframework.boot:spring-boot-starter-data-jpa`
