@@ -53,7 +53,7 @@ erDiagram
 ```shell
 docker pull ghcr.io/nixiedroid/petclinic:master
 docker images
-docker create --name petclinic -d -p 8086:8080 ghcr.io/nixiedroid/petclinic:master --spring.profiles.active=psql --spring.datasource.url=jdbc:postgresql://localhost:5432/petclinic --spring.datasource.username=user --spring.datasource.password=pass
+docker create --name petclinic -p 8080:8086 ghcr.io/nixiedroid/petclinic:master --spring.profiles.active=psql --spring.datasource.url=jdbc:postgresql://localhost:5432/petclinic --spring.datasource.username=user --spring.datasource.password=pass --server.address=0.0.0.0
 docker start petclinic
 docker ps
 docker attach petclinic
@@ -66,7 +66,7 @@ git clone https://github.com/nixiedroid/PetClinic.git
 cd PetClinic
 chmod +x ./mvnw
 ./mvnw -version
-./mvnw spring-boot:run  --spring.profiles.active=psql --spring.datasource.url=jdbc:postgresql://localhost:5432/petclinic --spring.datasource.username=user --spring.datasource.password=pass
+./mvnw spring-boot:run -Dspring-boot.run.arguments="--spring.profiles.active=psql --spring.datasource.url=jdbc:postgresql://localhost:5432/petclinic --spring.datasource.username=user --spring.datasource.password=pass --server.address=0.0.0.0 --server.port=8080"
 ```
 
 ### Запуск с H2
@@ -74,10 +74,11 @@ chmod +x ./mvnw
 ```shell
 docker pull ghcr.io/nixiedroid/petclinic:master
 docker images
-docker create --name petclinic -d -p 8086:8080 ghcr.io/nixiedroid/petclinic:master
+docker create --name petclinic -p 8080:8086 ghcr.io/nixiedroid/petclinic:master --server.address=0.0.0.0
 docker start petclinic
 docker ps
 docker attach petclinic
+docker remove petclinic
 ```
 
 или
@@ -87,7 +88,7 @@ git clone https://github.com/nixiedroid/PetClinic.git
 cd PetClinic
 chmod +x ./mvnw
 ./mvnw -version
-./mvnw spring-boot:run
+ ./mvnw spring-boot:run -Dspring-boot.run.arguments="--server.address=0.0.0.0 --server.port=8080"
 ```
 
 ### Postman collection
