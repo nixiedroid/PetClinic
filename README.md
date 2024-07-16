@@ -1,7 +1,7 @@
 ### Описание проекта
 
 Описание проекта
-Разработать систему управления для ветеринарной
+Разработать REST API систему управления для ветеринарной
 клиники. Система должна включать две основные
 сущности: Владелец (Owner) и Питомец (Pet). Каждый
 владелец может иметь множество питомцев, а каждый
@@ -46,8 +46,139 @@ erDiagram
  - Test:
    - `org.springframework.boot:spring-boot-starter-test`
 
-### Запуск
-```shell
+### Запуск с Postgres
 
+Таблицы в базе автоматически **НЕ** создаются 
+
+```shell
+docker pull ghcr.io/nixiedroid/petclinic:master
+docker images
+docker create --name petclinic -d -p 8086:8080 ghcr.io/nixiedroid/petclinic:master --spring.profiles.active=psql --spring.datasource.url=jdbc:postgresql://localhost:5432/petclinic --spring.datasource.username=user --spring.datasource.password=pass
+docker start petclinic
+docker ps
+docker attach petclinic
 ```
 
+или
+
+```shell
+git clone https://github.com/nixiedroid/PetClinic.git
+cd PetClinic
+chmod +x ./mvnw
+./mvnw -version
+./mvnw spring-boot:run  --spring.profiles.active=psql --spring.datasource.url=jdbc:postgresql://localhost:5432/petclinic --spring.datasource.username=user --spring.datasource.password=pass
+```
+
+### Запуск с H2
+
+```shell
+docker pull ghcr.io/nixiedroid/petclinic:master
+docker images
+docker create --name petclinic -d -p 8086:8080 ghcr.io/nixiedroid/petclinic:master
+docker start petclinic
+docker ps
+docker attach petclinic
+```
+
+или
+
+```shell
+git clone https://github.com/nixiedroid/PetClinic.git
+cd PetClinic
+chmod +x ./mvnw
+./mvnw -version
+./mvnw spring-boot:run
+```
+
+### Postman collection
+[colletion.json](notes/PetClinic.postman_collection.json)
+
+### Curl
+```shell
+curl -X GET http://localhost:8086/pets
+
+curl -X GET http://localhost:8086/pets/1
+
+curl -X POST http://localhost:8086/pets \
+     -H "Content-Type: application/json" \
+     -d '{
+           "id": 5,
+           "name": "Buddy",
+           "birthDate": "2020-01-15",
+           "type": "Dog",
+           "owner": {
+               "id": 1,
+               "firstName": "John",
+               "lastName": "Doe",
+               "address": "123 Main St",
+               "city": "Anytown",
+               "telephone": "555-1234"
+           }
+         }'
+
+
+curl -X PUT http://localhost:8086/pets/10 \
+     -H "Content-Type: application/json" \
+     -d '{
+           "id": 10,
+           "name": "Budddddy",
+           "birthDate": "2020-01-15",
+           "type": "Dog",
+           "owner": {
+               "id": 1,
+               "firstName": "John",
+               "lastName": "Doe",
+               "address": "123 Main St",
+               "city": "Anytown",
+               "telephone": "555-1234"
+           }
+         }'
+         
+curl -X DELETE http://localhost:8086/pets/2
+
+curl -X GET http://localhost:8086/owners
+
+curl -X GET http://localhost:8086/owners/1
+
+curl -X POST http://localhost:8086/owners \
+     -H "Content-Type: application/json" \
+     -d '{
+           "id": 11,
+           "firstName": "John",
+           "lastName": "Doe",
+           "address": "123 Main St",
+           "city": "Anytown",
+           "telephone": "555-1234",
+           "pets": [
+               {
+                   "id": 1,
+                   "name": "Buddy",
+                   "birthDate": "2020-01-15",
+                   "type": "Dog"
+               }
+           ]
+         }'
+
+curl -X PUT http://localhost:8086/owners/10 \
+     -H "Content-Type: application/json" \
+     -d '{
+           "id": 10,
+           "firstName": "John",
+           "lastName": "Doe",
+           "address": "123 Main St",
+           "city": "Anytown",
+           "telephone": "555-1234",
+           "pets": [
+               {
+                   "id": 1,
+                   "name": "dddf",
+                   "birthDate": "2020-01-15",
+                   "type": "Dog"
+               }
+           ]
+         }'
+
+curl -X DELETE http://localhost:8086/owners/1
+
+
+```

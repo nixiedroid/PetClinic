@@ -81,6 +81,13 @@ public class OwnerService {
             o.setAddress(dto.address());
             o.setTelephone(dto.telephone());
             o.setCity(dto.city());
+            o.setPets(
+                    dto.pets().stream()
+                            .map(p -> petRepository.findDistinctById(p.id()))
+                            .filter(Optional::isPresent)
+                            .map(Optional::get)
+                            .collect(Collectors.toList())
+            );
         } else { //Update Sequence
             o = ownerEntity.get();
             o.setFirstName(dto.firstName());

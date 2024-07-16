@@ -2,19 +2,20 @@ package com.nixiedroid.petclinic.controller;
 
 import com.nixiedroid.petclinic.model.Pet;
 import com.nixiedroid.petclinic.model.PetDTO;
+import com.nixiedroid.petclinic.service.ErrorMapper;
 import com.nixiedroid.petclinic.service.PetService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.Errors;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 /**
- * Controller class for  <a href="/Pets">/Pets</a> endpoint
+ * Controller class for  <a href="/pets">/pets</a> endpoint
  *
  * @see Pet
  * @see PetDTO
@@ -24,14 +25,24 @@ import java.util.Optional;
 public class PetController {
    
     private final PetService petService;
-    
+    private final ErrorMapper mapper;
+
     @Autowired
-    public PetController(PetService petService) {
+    public PetController(PetService petService, ErrorMapper mapper) {
         this.petService = petService;
+        this.mapper = mapper;
     }
 
     /**
-     * Listens for GET requests at <a href="/Pets">/Pets</a>
+     * Set Deep Pet Validator
+     */
+    @InitBinder
+    protected void initBinder(WebDataBinder binder) {
+        binder.setValidator(petService);
+    }
+
+    /**
+     * Listens for GET requests at <a href="/pets">/pets</a>
      *
      * @return json list of {@link Pet}
      */
@@ -41,53 +52,57 @@ public class PetController {
     }
     
     /**
-     * Listens for GET requests at <a href="/Pets{id}">/Pets/{id}</a>
+     * Listens for GET requests at <a href="/pets{id}">/pets/{id}</a>
      *
      * @return json object {@link Pet} if {id} exists or null
      */
     @GetMapping("/{id}")
-    public ResponseEntity<Pet> getPetById(@PathVariable Long id) {
-        Optional<Pet> pet = petService.getPetById(id);
+    public ResponseEntity<PetDTO> getPetById(@PathVariable Long id) {
+        Optional<PetDTO> pet = petService.getPetById(id);
         return pet.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
     
     /**
-     * Listens for POST requests at <a href="/Pets">/Pets</a>
+     * Listens for POST requests at <a href="/pets">/pets</a>
      * and creates Pet object accordingly
      *
      * @return newly created json object {@link Pet} on success
      */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public PetDTO createPet(@Valid  @RequestBody PetDTO petDTO) {
-        return petService.savePet(petDTO);
+    public ResponseEntity<?> createPet(@Valid  @RequestBody PetDTO dto,Errors errors) {
+        if(errors.hasErrors()) return new ResponseEntity<>(mapper.apply(errors),HttpStatus.BAD_REQUEST);
+        if (petService.existsById(dto.id())) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        } else return new ResponseEntity<>(petService.savePet(dto), HttpStatus.CREATED);
     }
 
     /**
-     * Listens for PUT requests at <a href="/Pets{id}">/Pets/{id}</a>
+     * Listens for PUT requests at <a href="/pets{id}">/pets/{id}</a>
      * and updates Pet object if {id} found
      * or creates Pet object if not-exists
      *
      * @return newly created json object {@link Pet} on success
      */
     @PutMapping("/{id}")
-    ResponseEntity<PetDTO> putPet(@PathVariable Long id,@Valid @RequestBody PetDTO dto) {
-        if (!Objects.equals(dto.id(), id)) new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+    ResponseEntity<?> putPet(@PathVariable Long id,@Valid @RequestBody PetDTO dto, Errors errors) {
+        if(errors.hasErrors()) return new ResponseEntity<>(mapper.apply(errors),HttpStatus.BAD_REQUEST);
+        if (!Objects.equals(dto.id(), id)) return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         if (petService.existsById(id)) {
             return new ResponseEntity<>(petService.savePet(dto), HttpStatus.OK);
         } else return new ResponseEntity<>(petService.savePet(dto), HttpStatus.CREATED);
     }
 
     /**
-     * Listens for DELETE requests at <a href="/Pets/{id}">/Pets/{id}</a>
+     * Listens for DELETE requests at <a href="/pets/{id}">/pets/{id}</a>
      * and deletes Pet object if {id} found
      */
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
     public ResponseEntity<Void> deletePet(@PathVariable Long id) {
         if (petService.existsById(id)) {
             petService.deletePet(id);
             return new ResponseEntity<>(HttpStatus.OK);
         } else return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
+
 }

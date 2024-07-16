@@ -28,6 +28,7 @@ public class Owner {
 
     @EqualsAndHashCode.Exclude
     @Builder.Default
+    @Setter(AccessLevel.NONE)
     @OneToMany(
             fetch = FetchType.LAZY,
             mappedBy = "owner",
@@ -35,4 +36,8 @@ public class Owner {
             orphanRemoval = true)
     private List<Pet> pets = new ArrayList<>();
 
+    public void setPets(List<Pet> ps){
+        pets.clear();
+        pets.addAll(ps);
+    }
 }

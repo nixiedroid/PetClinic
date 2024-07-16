@@ -2,11 +2,13 @@ package com.nixiedroid.petclinic.controller;
 
 import com.nixiedroid.petclinic.model.Owner;
 import com.nixiedroid.petclinic.model.OwnerDTO;
+import com.nixiedroid.petclinic.service.ErrorMapper;
 import com.nixiedroid.petclinic.service.OwnerService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,11 +26,12 @@ import java.util.Optional;
 public class OwnerController {
 
     private final OwnerService ownerService;
-
+    private final ErrorMapper mapper;
 
     @Autowired
-    public OwnerController(OwnerService ownerService) {
+    public OwnerController(OwnerService ownerService, ErrorMapper mapper) {
         this.ownerService = ownerService;
+        this.mapper = mapper;
     }
 
     /**
@@ -59,9 +62,11 @@ public class OwnerController {
      * @return newly created json object {@link Owner} on success
      */
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public OwnerDTO createOwner(@Valid @RequestBody OwnerDTO owner) {
-        return ownerService.saveOwner(owner);
+    public ResponseEntity<?> createOwner(@Valid @RequestBody OwnerDTO dto, Errors errors ) {
+        if(errors.hasErrors()) return new ResponseEntity<>(mapper.apply(errors),HttpStatus.BAD_REQUEST);
+        if (ownerService.existsById(dto.id())) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        } else return new ResponseEntity<>(ownerService.saveOwner(dto), HttpStatus.CREATED);
     }
 
     /**
@@ -72,8 +77,9 @@ public class OwnerController {
      * @return newly created json object {@link Owner} on success
      */
     @PutMapping("/{id}")
-    ResponseEntity<OwnerDTO> putOwner(@PathVariable Long id,@Valid @RequestBody OwnerDTO dto) {
-        if (!Objects.equals(dto.id(), id)) new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+    ResponseEntity<?> putOwner(@PathVariable Long id,@Valid @RequestBody OwnerDTO dto, Errors errors) {
+        if(errors.hasErrors()) return new ResponseEntity<>(mapper.apply(errors),HttpStatus.BAD_REQUEST);
+        if (!Objects.equals(dto.id(), id)) return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         if (ownerService.existsById(id)) {
             return new ResponseEntity<>(ownerService.saveOwner(dto), HttpStatus.OK);
         } else return new ResponseEntity<>(ownerService.saveOwner(dto), HttpStatus.CREATED);

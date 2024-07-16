@@ -7,13 +7,15 @@ import com.nixiedroid.petclinic.repository.OwnerRepository;
 import com.nixiedroid.petclinic.repository.PetRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.Errors;
+import org.springframework.validation.Validator;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-public class PetService {
+public class PetService implements Validator {
 
     private final OwnerRepository ownerRepository;
     private final PetRepository petRepository;
@@ -28,13 +30,13 @@ public class PetService {
         return petRepository.findAll().stream().map(this::toDto).collect(Collectors.toList());
     }
 
-    public Optional<Pet> getPetById(Long id) {
-        return petRepository.findById(id);
+    public Optional<PetDTO> getPetById(Long id) {
+        return petRepository.findById(id).map(this::toDto);
     }
 
     public PetDTO savePet(PetDTO pet) {
-        Pet p = toEntity(pet);
-        return toDto(petRepository.save(p));
+        Pet p = petRepository.save(toEntity(pet));
+        return toDto(p);
     }
 
     public void deletePet(Long id) {
@@ -80,15 +82,33 @@ public class PetService {
             o.setName(dto.name());
             o.setType(dto.type());
             o.setBirthDate(dto.birthDate());
+            o.setOwner(
+                    ownerRepository.findDistinctById(dto.owner().id()).orElse(null)
+            );
         } else { //Update Sequence
             o = petEntity.get();
             o.setName(dto.name());
             o.setType(dto.type());
             o.setBirthDate(dto.birthDate());
             o.setOwner(
-                    ownerRepository.findDistinctById(dto.owner().id()).orElse(null)
-            );
+                        ownerRepository.findDistinctById(dto.owner().id()).orElse(null)
+                );
         }
         return o;
+    }
+
+    @Override
+    public boolean supports(Class<?> clazz) {
+        return PetDTO.class.equals(clazz);
+    }
+
+    @Override
+    public void validate(Object target, Errors errors) {
+        PetDTO pet = (PetDTO) target;
+        if (pet.owner() == null) {
+            errors.rejectValue("owner","owner","Owner Must Not Be Null");
+        } else if (!ownerRepository.existsById(pet.owner().id())){
+            errors.rejectValue("owner","owner","Not Existent Owner");
+        }
     }
 }
