@@ -56,18 +56,29 @@ flowchart TB
 ```
 
 ### Зависимости проекта
-- `org.springframework.boot:spring-boot-starter-data-jpa`
-- `org.springframework.boot:spring-boot-starter-jdbc`
-- `org.springframework.boot:spring-boot-starter-validation`
-- `org.springframework.boot:spring-boot-starter-web`
- - Runtime:
-   - `com.h2database:h2`
-   - ` org.postgresql:postgresql`
- - Compile:
-   - `org.springframework.boot:spring-boot-configuration-processor`     
-   - `org.projectlombok:lombok`
- - Test:
-   - `org.springframework.boot:spring-boot-starter-test`
+
+Внутренние:
+   - `org.springframework.boot:spring-boot-starter-data-jpa`
+     - `org.springframework.boot:spring-boot-starter-jdbc`
+     - `org.springframework.boot:spring-boot-starter-validation`
+     - `org.springframework.boot:spring-boot-starter-web`
+     - Runtime:
+          - `com.h2database:h2`
+            - ` org.postgresql:postgresql`
+     - Compile:
+          - `org.springframework.boot:spring-boot-configuration-processor`     
+            - `org.projectlombok:lombok`
+     - Test:
+          - `org.springframework.boot:spring-boot-starter-test`
+
+Внешние
+   - Docker (необязательно)
+   - PostgreSQL (необязательно)
+
+Для Postgres требуется предварительно созданная и настроенная 
+база данных 
+1. [schema.sql](src/main/resources/schema.sql) 
+2. [data.sql](src/main/resources/data.sql)
 
 ### Запуск с Postgres
 
@@ -115,7 +126,7 @@ chmod +x ./mvnw
 ```
 
 ### Postman collection
-[colletion.json](notes/PetClinic.postman_collection.json)
+[colleсtion.json](notes/PetClinic.postman_collection.json)
 
 ### Curl
 ```shell

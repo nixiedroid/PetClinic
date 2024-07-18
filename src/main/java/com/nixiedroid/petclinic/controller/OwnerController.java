@@ -16,7 +16,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- * Controller class for  <a href="/Owners">/Owners</a> endpoint
+ * Controller class for  <a href="/owners">/owners</a> endpoint
  *
  * @see Owner
  * @see OwnerDTO
@@ -35,7 +35,7 @@ public class OwnerController {
     }
 
     /**
-     * Listens for GET requests at <a href="/Owners">/Owners</a>
+     * Listens for GET requests at <a href="/owners">/owners</a>
      *
      * @return json list of {@link Owner}
      */
@@ -45,56 +45,71 @@ public class OwnerController {
     }
 
     /**
-     * Listens for GET requests at <a href="/Owners{id}">/Owners/{id}</a>
+     * Listens for GET requests at <a href="/owners/{id}">/owners/{id}</a>
      *
      * @return json object {@link Owner} if {id} exists or null
      */
     @GetMapping("/{id}")
     public ResponseEntity<OwnerDTO> getOwnerById(@PathVariable Long id) {
         Optional<OwnerDTO> owner = ownerService.getOwnerById(id);
-        return owner.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        return owner.map(dto -> new ResponseEntity<>(dto, HttpStatus.OK))
+                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
     /**
-     * Listens for POST requests at <a href="/Owners">/Owners</a>
+     * Listens for POST requests at <a href="/owners">/owners</a>
      * and creates Owner object accordingly
      *
      * @return newly created json object {@link Owner} on success
      */
     @PostMapping
-    public ResponseEntity<?> createOwner(@Valid @RequestBody OwnerDTO dto, Errors errors ) {
-        if(errors.hasErrors()) return new ResponseEntity<>(mapper.apply(errors),HttpStatus.BAD_REQUEST);
-        if (ownerService.existsById(dto.id())) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        } else return new ResponseEntity<>(ownerService.saveOwner(dto), HttpStatus.CREATED);
+    public ResponseEntity<?> createOwner(@Valid @RequestBody OwnerDTO dto, Errors errors) {
+        if (errors.hasErrors()) {
+            return new ResponseEntity<>(mapper.apply(errors), HttpStatus.BAD_REQUEST);
+        }
+        if (dto.id() != null) {
+            if (ownerService.existsById(dto.id())) {
+                errors.rejectValue("id", "NULL", "Owner is already exists");
+                return new ResponseEntity<>(mapper.apply(errors), HttpStatus.BAD_REQUEST);
+            }
+        }
+        return new ResponseEntity<>(ownerService.saveOwner(dto), HttpStatus.CREATED);
     }
 
     /**
-     * Listens for PUT requests at <a href="/Owners{id}">/Owners/{id}</a>
+     * Listens for PUT requests at <a href="/owners/{id}">/owners/{id}</a>
      * and updates Owner object if {id} found
      * or creates Owner object if not-exists
      *
      * @return newly created json object {@link Owner} on success
      */
     @PutMapping("/{id}")
-    ResponseEntity<?> putOwner(@PathVariable Long id,@Valid @RequestBody OwnerDTO dto, Errors errors) {
-        if(errors.hasErrors()) return new ResponseEntity<>(mapper.apply(errors),HttpStatus.BAD_REQUEST);
-        if (!Objects.equals(dto.id(), id)) return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    ResponseEntity<?> putOwner(@PathVariable Long id, @Valid @RequestBody OwnerDTO dto, Errors errors) {
+        if (errors.hasErrors()) {
+            return new ResponseEntity<>(mapper.apply(errors), HttpStatus.BAD_REQUEST);
+        }
+        if (dto.id() == null) {
+            errors.rejectValue("id", "EXIST", "Id must not be null");
+            return new ResponseEntity<>(mapper.apply(errors), HttpStatus.BAD_REQUEST);
+        }
+        if (!Objects.equals(dto.id(), id)) {
+            errors.rejectValue("id", "MISS", "Id mismatch");
+            return new ResponseEntity<>(mapper.apply(errors), HttpStatus.BAD_REQUEST);
+        }
         if (ownerService.existsById(id)) {
             return new ResponseEntity<>(ownerService.saveOwner(dto), HttpStatus.OK);
         } else return new ResponseEntity<>(ownerService.saveOwner(dto), HttpStatus.CREATED);
     }
 
     /**
-     * Listens for DELETE requests at <a href="/Owners/{id}">/Owners/{id}</a>
+     * Listens for DELETE requests at <a href="/owners/{id}">/owners/{id}</a>
      * and deletes Owner object if {id} found
      */
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
     public ResponseEntity<Void> deleteOwner(@PathVariable Long id) {
         if (ownerService.existsById(id)) {
             ownerService.deleteOwner(id);
-            return new ResponseEntity<>(HttpStatus.OK);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 }
