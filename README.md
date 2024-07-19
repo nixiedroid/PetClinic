@@ -87,7 +87,7 @@ flowchart TB
 ```shell
 docker pull ghcr.io/nixiedroid/petclinic:master
 docker images
-docker create --name petclinic -p 8080:8086 ghcr.io/nixiedroid/petclinic:master --spring.profiles.active=psql --spring.datasource.url=jdbc:postgresql://localhost:5432/petclinic --spring.datasource.username=user --spring.datasource.password=pass --server.address=0.0.0.0
+docker create --name petclinic -p 8086:8086 ghcr.io/nixiedroid/petclinic:master --spring.profiles.active=psql --spring.datasource.url=jdbc:postgresql://localhost:5432/petclinic --spring.datasource.username=user --spring.datasource.password=pass --server.address=0.0.0.0
 docker start petclinic
 docker ps
 docker attach petclinic
@@ -100,7 +100,7 @@ git clone https://github.com/nixiedroid/PetClinic.git
 cd PetClinic
 chmod +x ./mvnw
 ./mvnw -version
-./mvnw spring-boot:run -Dspring-boot.run.arguments="--spring.profiles.active=psql --spring.datasource.url=jdbc:postgresql://localhost:5432/petclinic --spring.datasource.username=user --spring.datasource.password=pass --server.address=0.0.0.0 --server.port=8080"
+./mvnw spring-boot:run -Dspring-boot.run.arguments="--spring.profiles.active=psql --spring.datasource.url=jdbc:postgresql://localhost:5432/petclinic --spring.datasource.username=user --spring.datasource.password=pass --server.address=0.0.0.0"
 ```
 
 ### Запуск с H2
@@ -108,7 +108,7 @@ chmod +x ./mvnw
 ```shell
 docker pull ghcr.io/nixiedroid/petclinic:master
 docker images
-docker create --name petclinic -p 8080:8086 ghcr.io/nixiedroid/petclinic:master --server.address=0.0.0.0
+docker create --name petclinic -p 8086:8086 ghcr.io/nixiedroid/petclinic:master --server.address=0.0.0.0
 docker start petclinic
 docker ps
 docker attach petclinic
@@ -122,7 +122,7 @@ git clone https://github.com/nixiedroid/PetClinic.git
 cd PetClinic
 chmod +x ./mvnw
 ./mvnw -version
- ./mvnw spring-boot:run -Dspring-boot.run.arguments="--server.address=0.0.0.0 --server.port=8080"
+ ./mvnw spring-boot:run -Dspring-boot.run.arguments="--server.address=0.0.0.0"
 ```
 
 ### Postman collection
