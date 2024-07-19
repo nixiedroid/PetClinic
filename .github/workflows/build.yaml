@@ -44,7 +44,7 @@ jobs:
           java-version: '17'
 
       - name: Maven test package
-        run: java --version &&  chmod +x ./mvnw &&  ./mvnw test
+        run: java --version &&  chmod +x ./mvnw &&  ./mvnw test -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
 
   build:
     timeout-minutes: 5
@@ -80,7 +80,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
       - name: Maven build package
-        run: java --version &&  chmod +x ./mvnw &&  ./mvnw clean package
+        run: java --version &&  chmod +x ./mvnw &&  ./mvnw clean package -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
 
       - name: Build and push Docker image
         id: push
